@@ -11,7 +11,7 @@ class CreateBraintreeUser
     /**
      * @param BraintreeService $service
      */
-    public function __construct(public BraintreeService $service) {}
+    public function __construct(protected BraintreeService $service) {}
 
     /**
      * @param Registered $event

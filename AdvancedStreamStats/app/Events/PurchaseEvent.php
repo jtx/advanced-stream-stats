@@ -7,5 +7,5 @@ class PurchaseEvent
     /**
      * @param \JsonSerializable $purchase
      */
-    public function __construct(public \JsonSerializable $purchase) {}
+    public function __construct(protected \JsonSerializable $purchase) {}
 }
