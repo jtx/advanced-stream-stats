@@ -11,6 +11,8 @@ use Braintree\Plan;
 use Braintree\Result\Error;
 use Braintree\Result\Successful;
 use Braintree\Customer;
+use Braintree\Subscription;
+use JsonSerializable;
 
 class BraintreeService
 {
@@ -62,6 +64,23 @@ class BraintreeService
     }
 
     /**
+     * @param User $user
+     * @return array
+     * @throws Exception\NotFound
+     */
+    public function getActiveSubscriptions(User $user): array
+    {
+        $userData = $this->getCustomer($user);
+        $subscriptions = data_get($userData, 'paymentMethods.*.subscriptions');
+        $activeSubscriptions = [];
+        foreach ($subscriptions as $subscription) {
+            $activeSubscriptions = array_merge($activeSubscriptions, array_filter($subscription, fn($sub) => $sub->status == Subscription::ACTIVE));
+        }
+
+        return $activeSubscriptions;
+    }
+
+    /**
      * Create a new payment method
      *
      * @param User $user
@@ -107,7 +126,13 @@ class BraintreeService
         });
     }
 
-    public function createSubscription(string $planId, string $paymentToken)
+    /**
+     * @param string $planId
+     * @param string $paymentToken
+     * @return JsonSerializable
+     * @throws Exception
+     */
+    public function createSubscription(string $planId, string $paymentToken): JsonSerializable
     {
         $result = $this->gateway->subscription()->create([
             'paymentMethodToken' => $paymentToken,

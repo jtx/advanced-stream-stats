@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use App\Http\Controllers\HomeController;
+use \App\Http\Controllers\SubscriptionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +17,7 @@ use App\Http\Controllers\HomeController;
 */
 
 Route::get('/', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::post('/purchase', [SubscriptionsController::class, 'purchase'])->middleware(['auth', 'verified'])->name('subscription.purchase');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

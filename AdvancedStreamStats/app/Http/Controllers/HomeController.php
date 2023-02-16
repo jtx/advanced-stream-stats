@@ -27,18 +27,19 @@ class HomeController extends Controller
      */
     public function index(BraintreeService $service): Response
     {
-        $userData = $service->getCustomer(auth()->user());
-        $subscriptions = data_get($userData, 'paymentMethods.*.subscriptions');
-        $activeSubscriptions = [];
-        foreach ($subscriptions as $subscription) {
-            $activeSubscriptions = array_merge($activeSubscriptions, array_filter($subscription, fn($sub) => $sub->status == Subscription::ACTIVE));
+        $activeSubscriptions = $service->getActiveSubscriptions(request()->user());
+
+        // I don't feel like installing moment, so just do it here
+        foreach ($activeSubscriptions as $key => $subscription) {
+            $activeSubscriptions[$key]->_set('nextBillingDate', $subscription->nextBillingDate->format('m/d/Y'));
         }
 
         $plans = data_get($activeSubscriptions, '*.planId');
 
         return Inertia::render('Dashboard', [
             'subscriptions' => $activeSubscriptions,
-            'hasYearly' => in_array($plans, BraintreeSubscriptions::PLAN_ANNUAL),
+            'hasYearly' => in_array(BraintreeSubscriptions::PLAN_ANNUAL, $plans),
+            'plans' => $service->getPlans(),
         ]);
     }
 }
