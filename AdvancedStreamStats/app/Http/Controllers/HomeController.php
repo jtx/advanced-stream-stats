@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\BraintreeSubscriptions;
+use App\Services\BraintreeService;
+use Braintree\Subscription;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class HomeController extends Controller
 {
@@ -17,12 +21,24 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @param BraintreeService $service
+     * @return Response
+     * @throws \Braintree\Exception\NotFound
      */
-    public function index()
+    public function index(BraintreeService $service): Response
     {
-        return view('home');
+        $userData = $service->getCustomer(auth()->user());
+        $subscriptions = data_get($userData, 'paymentMethods.*.subscriptions');
+        $activeSubscriptions = [];
+        foreach ($subscriptions as $subscription) {
+            $activeSubscriptions = array_merge($activeSubscriptions, array_filter($subscription, fn($sub) => $sub->status == Subscription::ACTIVE));
+        }
+
+        $plans = data_get($activeSubscriptions, '*.planId');
+
+        return Inertia::render('Dashboard', [
+            'subscriptions' => $activeSubscriptions,
+            'hasYearly' => in_array($plans, BraintreeSubscriptions::PLAN_ANNUAL),
+        ]);
     }
 }

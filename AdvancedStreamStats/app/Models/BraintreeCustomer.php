@@ -47,4 +47,12 @@ class BraintreeCustomer extends Model
     {
         return $this->hasMany(BraintreeCustomerPaymentMethod::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function braintree_card_on_file(): HasMany
+    {
+        return $this->hasMany(BraintreeCardOnFile::class, 'braintree_customer_id');
+    }
 }

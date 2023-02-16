@@ -43,6 +43,22 @@ class User extends Authenticatable
     ];
 
     /**
+     * @return string
+     */
+    public function getFirstNameAttribute(): string
+    {
+        return explode(' ', $this->name, 2)[0] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastNameAttribute(): string
+    {
+        return explode(' ', $this->name, 2)[1] ?? '';
+    }
+
+    /**
      * @return HasOne
      */
     public function braintree_customer(): HasOne
