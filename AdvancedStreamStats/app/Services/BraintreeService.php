@@ -147,6 +147,17 @@ class BraintreeService
     }
 
     /**
+     * @param string $subscriptionId
+     * @return JsonSerializable
+     */
+    public function cancelSubscription(string $subscriptionId): JsonSerializable
+    {
+        // For some reason, this method will actually throw an exception instead of returning an instance of Error
+        // so... Let it do it.
+        return $this->gateway->subscription()->cancel($subscriptionId);
+    }
+
+    /**
      * @param User $user
      * @return string
      * @throws Exception\NotFound
@@ -184,5 +195,4 @@ class BraintreeService
             'braintree_customer_id' => $result->id,
         ]);
     }
-
 }
